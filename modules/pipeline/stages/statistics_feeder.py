@@ -16,3 +16,7 @@ class StatisticsFeeder(Stage):
         svc.increment_message_number(self.bus.sender, self.bus.recipient)
 
         return True
+
+    @property
+    def is_interfere(self):
+        return False

@@ -28,6 +28,8 @@ class EmailHeaderChunk(NotifyChanged):
 
             if isinstance(decoded, str):
                 self._text = unicode(decoded.decode(self._charset))
+            else:
+                self._text = decoded.decode(self._charset)
 
             self._update_from_text()
 

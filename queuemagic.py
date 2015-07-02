@@ -1,7 +1,7 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
-import traceback
 from StringIO import StringIO
+
 from app.config_provider import ConfigProvider, ConfigSectionRoot
 from app.logger import *
 from messages.mail import EmailFacade
@@ -13,14 +13,15 @@ from services.base.statistics import Statistics
 from services.resolver import ServiceResolver
 from userconfig import config
 
+
 __author__ = 'vdv'
 
 import argparse
 import sys
 from subprocess import Popen, PIPE
 import shlex
-import shutil
 import os
+import posix
 
 
 class QueueMagicCliArguments(object):
@@ -121,6 +122,9 @@ class QueueMagicCliArguments(object):
 
     @property
     def should_use_stout(self):
+        if self.output == '-':
+            return True
+
         return self.output is None and not self.should_output_exec and not self._args.mute
 
     @property
@@ -193,6 +197,12 @@ class QueueMagicCli(object):
         log_debug('write output smtp message to stdout')
         email.write_to(sys.stdout)
 
+    def _write_email(self, email):
+        output = self._args.output
+        log_debug('write output smtp message to {0}'.format(output))
+        with open(name=output, mode='w') as fd:
+            email.write_to(fd)
+
     def _output_exec(self, email):
         log_debug('attempt to start subprocess "{0}"', self._args.output_exec)
         fd = StringIO()
@@ -233,15 +243,22 @@ class QueueMagicCli(object):
         return svc.send(email=email, sender=sender, recipients=[recipient])
 
     def run(self):
-        return_code = 0
-        pipeline_exec_result = False
-        pipeline = None
+        return_code = posix.EX_OK
 
         try:
             email = self._get_email()
+        except IOError, e:
+            log_error('Unable to fetch email', error=e)
+            sys.exit(posix.EX_IOERR)
         except Exception, e:
             log_error('Unable to fetch email', error=e)
-            sys.exit(74)
+            sys.exit(posix.EX_DATAERR)
+
+        if self._args.delete_input:
+            try:
+                os.remove(self._args.input)
+            except Exception, e:
+                log_error('Unable to delete input file', e)
 
         try:
             pipeline = self._get_pipeline(email=email)
@@ -249,17 +266,17 @@ class QueueMagicCli(object):
                 raise Exception('Unable to create pipeline ' + self._args.pipeline)
         except Exception, e:
             log_error('Unable to create pipeline ' + self._args.pipeline, error=e)
-            sys.exit(74)
+            sys.exit(posix.EX_SOFTWARE)
 
         try:
             pipeline_exec_result = pipeline.execute()
         except Exception, e:
             log_error('Pipeline execution error', e)
-            sys.exit(74)
+            sys.exit(posix.EX_SOFTWARE)
 
         if not pipeline_exec_result and pipeline.on_fail == FailAction.Drop:
             print('Broken pipeline policies has rejected this message')
-            sys.exit(74)
+            sys.exit(posix.EX_SOFTWARE)
 
         if self._args.should_feed_statistics:
             try:
@@ -269,30 +286,31 @@ class QueueMagicCli(object):
 
         email = pipeline.bus.email
 
-        if self._args.should_use_stout:
-            self._print_email(email=email)
-        elif self._args.should_output_exec:
-            try:
-                return_code = self._output_exec(email=email)
-            except Exception, e:
-                log_error('Subprocess execution failed', e)
-                return_code = 74
+        try:
+            if self._args.should_use_stout:
+                self._print_email(email=email)
+            elif not self._args.output is None:
+                self._write_email(email=email)
+        except Exception, e:
+            log_error('Cannot write output file', e)
+            return_code = posix.EX_TEMPFAIL
 
         if self._args.should_send:
             try:
                 return_code = self._send(email=email, sender=self._args.sender, recipient=self._args.recipient)
             except Exception, e:
                 log_error('SendMail service execution failed', e)
-                return_code = 74
+                return_code = posix.EX_TEMPFAIL
+
+        if self._args.should_output_exec:
+            try:
+                return_code = self._output_exec(email=email)
+            except Exception, e:
+                log_error('Subprocess execution failed', e)
+                return_code = posix.EX_TEMPFAIL
 
         if self._args.verbose:
             print(pipeline.bus.data)
-
-        if self._args.delete_input:
-            try:
-                os.remove(self._args.input)
-            except Exception, e:
-                log_error('Unable to delete input file', e)
 
         log_debug('execution completed with {0}', str(pipeline.bus.data))
 

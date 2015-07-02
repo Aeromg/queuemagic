@@ -4,8 +4,7 @@ __author__ = 'vdv'
 from email.utils import getaddresses
 from email.message import Message
 
-from utils.observable_list import ObservableList
-from messages.address import EmailAddress
+from messages.address import EmailAddress, EmailAddresses
 from messages.header_proxy import EmailMessageHeaderProxy
 
 
@@ -73,8 +72,9 @@ class EmailHeadersAggregator(object):
         if header_name in self._header_proxies.keys():
             return self._header_proxies[header_name]
 
-        proxy = ObservableList(
+        proxy = EmailAddresses(
             map(lambda raw: EmailAddress(raw=raw), getaddresses(self.get_all(header_name)))
+            if header_name in self._message.keys() else []
         )
 
         self._header_proxies[header_name] = proxy
@@ -83,7 +83,11 @@ class EmailHeadersAggregator(object):
             proxy.on_changed()
 
         def addresses_changed(addresses):
-            self._message.replace_header(header_name, ', \r\n\t'.join(map(lambda a: a.format(), addresses)))
+            value = ', \r\n\t'.join(map(lambda a: a.format(), addresses))
+            if header_name in self._message.keys():
+                self._message.replace_header(header_name, value)
+            else:
+                self._message.add_header(header_name, value)
             for a in addresses:
                 if not address_changed in a.changed:
                     a.changed.append(address_changed)
@@ -99,10 +103,16 @@ class EmailHeadersAggregator(object):
         if header_name in self._header_proxies.keys():
             return self._header_proxies[header_name]
 
-        proxy = EmailAddress(raw=self.get_all(header_name)[0])
+        if header_name in self._message.keys():
+            proxy = EmailAddress(raw=self.get_all(header_name)[0])
+        else:
+            proxy = EmailAddress(decoded_name=u'', address=u'')
 
         def address_changed(address):
-            self._message.replace_header(header_name, address.format())
+            if header_name in self._message.keys():
+                self._message.replace_header(header_name, address.format())
+            else:
+                self._message.add_header(header_name, address.format())
 
         proxy.changed.append(address_changed)
 
@@ -115,7 +125,7 @@ class EmailHeadersAggregator(object):
         if header in self._message.keys():
             self.get_header_proxy(header).text = value
         else:
-            self.create_header_proxy(header, value)
+            self.create_header_proxy(header).text = value
 
     def _get(self, header):
         if header in EmailHeadersAggregator.ADDRESS_HEADERS:

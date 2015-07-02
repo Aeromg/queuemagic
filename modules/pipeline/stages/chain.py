@@ -25,3 +25,7 @@ class Chain(Stage):
     @property
     def can_fork(self):
         return self._pipeline.can_fork
+
+    @property
+    def is_interfere(self):
+        return False

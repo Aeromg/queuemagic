@@ -7,7 +7,6 @@ from pipelines.stage import Stage
 
 
 class FailAction:
-
     Continue = 1
     Rollback = 2
     Drop = 3
@@ -52,10 +51,10 @@ class Pipeline(Stage):
         return self._modules
 
     def execute(self):
-        use_snapshots = self.on_fail in [FailAction.Continue, FailAction.Rollback]
+        pipeline_use_snapshot = self.on_fail in [FailAction.Continue, FailAction.Rollback]
 
-        log_debug('Executing pipeline <{0}>; fail_action={1}; use_snapshots={2}; email_facade_obj={3}',
-                  self.name, str(self._fail_action), str(use_snapshots), str(self.bus.email))
+        log_debug('Executing pipeline <{0}>; fail_action={1}; pipeline_use_snapshot={2}; email_facade_obj={3}',
+                  self.name, str(self._fail_action), str(pipeline_use_snapshot), str(self.bus.email))
 
         pipeline_run_result = self.bus.append_stage_result(self)
 
@@ -79,6 +78,8 @@ class Pipeline(Stage):
             log_debug('Attempt to exec module <{0}> in pipeline <{1}>', module.name, self.name)
 
             module_run_result = self.bus.append_stage_result(module=module)
+
+            use_snapshots = pipeline_use_snapshot and module.is_interfere
 
             try:
                 if use_snapshots:
@@ -120,8 +121,8 @@ class Pipeline(Stage):
                 if use_snapshots:
                     self.bus.snapshot_pull()
 
-#        if use_snapshots:
-#            self.bus.snapshot_pull_all()
+                    #        if use_snapshots:
+                    #            self.bus.snapshot_pull_all()
 
         pipeline_run_result.run = True
         pipeline_run_result.filter = True
@@ -134,3 +135,7 @@ class Pipeline(Stage):
     @property
     def can_fork(self):
         return any(map(lambda m: m.can_fork, self.modules))
+
+    @property
+    def is_interfere(self):
+        return any(map(lambda m: m.is_interfere, self.modules))

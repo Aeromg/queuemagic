@@ -37,3 +37,7 @@ class Switch(Stage):
     @property
     def can_fork(self):
         return self._then_stage.can_fork or self._else_stage.can_fork
+
+    @property
+    def is_interfere(self):
+        return self._then_stage.is_interfere or self._else_stage.is_interfere

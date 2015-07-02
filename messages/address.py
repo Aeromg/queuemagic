@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from utils.iterable import first_or_default
+from utils.observable_list import ObservableList
+
 __author__ = 'vdv'
 
 from email.utils import formataddr, getaddresses
@@ -30,7 +33,8 @@ class EmailAddress(NotifyChanged):
             if decoded_name is None:
                 decoded_name = ''
 
-            self._name_chunk = EmailHeaderChunk(decoded=decoded_name)
+            self._name_chunk = EmailHeaderChunk(decoded=u'')
+            self._name_chunk.text = decoded_name
             self._address = address
 
     @property
@@ -61,6 +65,20 @@ class EmailAddress(NotifyChanged):
 
     def __repr__(self):
         if self.name:
-            return '"{0}" <{1}>'.encode('utf-8').format(self.name.encode('utf-8'), unicode(self.address.encode('utf-8')))
+            return '"{0}" <{1}>'.encode('utf-8').format(self.name.encode('utf-8'),
+                                                        unicode(self.address.encode('utf-8')))
         else:
             return '<{0}>'.encode('utf-8').format(unicode(self.address.encode('utf-8')))
+
+
+class EmailAddresses(ObservableList):
+    def __init__(self, value, observer=None):
+        ObservableList.__init__(self, value=value, observer=observer)
+
+    def append_address(self, address, name):
+        self.append(EmailAddress(address=address, decoded_name=name))
+
+    def remove_address(self, address):
+        address_obj = first_or_default([obj for obj in self if obj.address == address])
+        if address_obj:
+            self.remove(address_obj)

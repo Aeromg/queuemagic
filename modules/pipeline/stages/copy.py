@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+import re
+
 from pipelines.expression_argument import ExpressionArgument
 from pipelines.stage import Stage
-import re
 from services.base.sendmail import SendMail
+
 
 __author__ = 'vdv'
 
@@ -39,3 +41,7 @@ class Copy(Stage):
             self._write(destination)
 
         return True
+
+    @property
+    def is_interfere(self):
+        return False

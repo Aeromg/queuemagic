@@ -12,3 +12,7 @@ class Break(Stage):
         self.bus.dispose()
 
         return True
+
+    @property
+    def is_interfere(self):
+        return False

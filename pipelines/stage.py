@@ -22,3 +22,7 @@ class Stage(Module):
     @property
     def can_fork(self):
         return False
+
+    @property
+    def is_interfere(self):
+        return True

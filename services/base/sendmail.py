@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from messages.mail import EmailFacade
 from services.service import Service
 
 __author__ = 'vdv'

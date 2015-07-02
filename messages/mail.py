@@ -5,10 +5,13 @@ from messages.payload_proxy import EmailPayloadProxy
 __author__ = 'vdv'
 
 from email.message import Message
-from email import message_from_file
+from email import message_from_file, Utils
 from email import message_from_string
 from messages.headers_aggregator import EmailHeadersAggregator
 from messages.text_aggregator import EmailTextContentAggregator
+
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 
 def _message_from_fd(fd):
@@ -25,13 +28,14 @@ def _message_from_string(text):
 
 
 class EmailFacade(object):
-    def __init__(self, fd=None, file_path=None, text=None):
-        assert len([arg for arg in [fd, file_path, text] if arg]) == 1
+    def __init__(self, fd=None, file_path=None, text=None, message=None):
+        assert len([arg for arg in [fd, file_path, text, message] if bool(arg)]) == 1
 
         payload = \
             _message_from_fd(fd) if fd else \
-            _message_from_path(file_path) if file_path else \
-            _message_from_string(text)
+                _message_from_path(file_path) if file_path else \
+                    _message_from_string(text) if text else \
+                        message
 
         assert isinstance(payload, Message)
 
@@ -135,3 +139,34 @@ class EmailFacade(object):
 
     def write_to(self, fd):
         fd.write(self._payload.as_string())
+
+    @staticmethod
+    def generate(alternative=False, subject=None, plain=None, html=None, sender_address=None, sender_name=None):
+        alternative = alternative or not html is None
+        if alternative:
+            message = MIMEMultipart('alternative')
+            message.attach(MIMEText('', 'plain'))
+            message.attach(MIMEText('', 'html'))
+        else:
+            message = MIMEText('', 'plain')
+
+        message['Date'] = Utils.formatdate(localtime=1)
+        message['Message-ID'] = Utils.make_msgid()
+
+        facade = EmailFacade(message=message)
+
+        if subject:
+            facade.subject = subject
+
+        if plain:
+            facade.text = plain
+
+        if html:
+            facade.html = html
+
+        if sender_address:
+            facade.from_address.address = sender_address
+            if sender_name:
+                facade.from_address.name = sender_name
+
+        return facade
