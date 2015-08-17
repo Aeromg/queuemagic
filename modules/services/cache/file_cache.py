@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from services.base.cache import Cache
+from app.logger import log_error
 
 __author__ = 'vdv'
 
@@ -12,7 +13,7 @@ class FileCache(Cache):
     def __init__(self, config, service_resolver):
         Cache.__init__(self, config=config, service_resolver=service_resolver)
 
-        self._cache_prefix = self.config.strict('prefix', types=[str], non_empty=False)
+        self._cache_prefix = self.config.strict('prefix', types=[str], default='cache')
         self._cache_path = self.config.strict('path', types=[str], non_empty=True)
         self._cache_ttl = self.config.strict('ttl', types=[int], non_empty=True)
 
@@ -22,17 +23,13 @@ class FileCache(Cache):
 
     @staticmethod
     def _restore_object(filename):
-        fh = open(filename, 'rb')
-        obj = _Pickle.load(fh)
-        fh.close()
-        return obj
+        with open(filename, 'rb') as fh:
+            return _Pickle.load(fh)
 
     @staticmethod
     def _store_object(obj, filename):
-        fh = open(filename, 'wb')
-        obj = _Pickle.dump(obj, fh, 2)
-        fh.close()
-        return obj
+        with open(filename, 'wb') as fh:
+            return _Pickle.dump(obj, fh, 2)
 
     def try_get(self, key):
         filename = self._get_object_filename(key)
@@ -42,17 +39,29 @@ class FileCache(Cache):
 
         lifetime = time.time() - os.stat(filename).st_ctime
         if lifetime <= self._cache_ttl:
-            return FileCache._restore_object(filename)
+            try:
+                return FileCache._restore_object(filename)
+            except Exception, e:
+                log_error(text='File cache restore error', error=e)
 
         return None
 
     def set(self, obj, key):
         filename = self._get_object_filename(key)
 
-        if os.path.exists(filename):
-            os.remove(filename)
+        if os.path.isfile(filename):
+            try:
+                os.remove(filename)
+            except IOError, e:
+                log_error(text='File cache set error', error=e)
 
-        if not os.path.exists(self._cache_path):
-            os.makedirs(self._cache_path)
+        if not os.path.isdir(self._cache_path):
+            try:
+                os.makedirs(self._cache_path)
+            except IOError, e:
+                log_error(text='File cache set error', error=e)
 
-        FileCache._store_object(obj, filename)
+        try:
+            FileCache._store_object(obj, filename)
+        except Exception, e:
+            log_error(text='File cache set error', error=e)

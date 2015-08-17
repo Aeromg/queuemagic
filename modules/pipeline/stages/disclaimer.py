@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from pipelines.stage import Stage
-from services.base.authority import AuthoritySource, AuthorityInfo
-from services.base.text_factory import TextFactory
 import re
+
+from pipelines.stage import Stage
+from services.base.text_factory import TextFactory
+
 
 __author__ = 'vdv'
 
@@ -19,10 +20,11 @@ class Disclaimer(Stage):
     def _get_text(self, template):
         view_bag = self.config.strict('view_bag', types=[dict], default={}).copy()
         view_bag.update({
-            'auth': self.bus.auth,
+            'auth': self.bus.identity,
             'sender': self.bus.sender,
             'recipient': self.bus.recipient,
-            'modules': self.bus.modules
+            'modules': self.bus.modules,
+            'bus': self.bus.data
         })
 
         return self._text_svc.get_text(view_bag=view_bag, template=template)

@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from pipelines.filter import Filter
-from pipelines.stage import Stage
 from services.base.modules_resolver import ModulesResolver as ModulesResolverBase
 
 __author__ = 'vdv'

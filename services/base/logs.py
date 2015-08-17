@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import inspect
 import traceback
+
 from services.service import Service
+
 
 __author__ = 'vdv'
 
@@ -26,7 +28,8 @@ class Logs(Service):
     def __init__(self, config, service_resolver):
         Service.__init__(self, config=config, service_resolver=service_resolver)
 
-    def _get_caller(self, stack_back=3):
+    @staticmethod
+    def _get_caller(stack_back=3):
         (frame, filename, line_number, function_name, lines, index) = inspect.getouterframes(
             inspect.currentframe())[stack_back]
 

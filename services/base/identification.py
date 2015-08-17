@@ -4,20 +4,20 @@ from services.service import Service
 __author__ = 'vdv'
 
 
-class AuthoritySource(Service):
+class IdentificationSource(Service):
     def __init__(self, config, service_resolver):
         Service.__init__(self, config=config, service_resolver=service_resolver)
 
     def try_get_auth(self, username):
         """
-        :rtype : AuthorityInfo
+        :rtype : Identification
         """
         raise Exception('Abstract method call')
 
 
-class AuthorityInfo(object):
+class Identification(object):
     def __init__(self):
-        raise Exception('Abstract class init')
+        pass
 
     @property
     def account(self):

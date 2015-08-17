@@ -9,17 +9,18 @@ class ConfigProvider(object):
     def __init__(self):
         pass
 
-    def get(self, key):
+    def get(self, key, extend=None):
         """
         :param key: str
         :raise Exception: KeyError
         """
         raise Exception('Method must be overridden')
 
-    def try_get(self, key, default=None):
+    def try_get(self, key, default=None, extend=None):
         raise Exception('Method must be overridden')
 
-    def strict(self, key, default=None, types=None, values=None, can_call=None, can_iterate=None, non_empty=False):
+    def strict(self, key, default=None, types=None, values=None, can_call=None, can_iterate=None, non_empty=False,
+               extend=None):
         raise Exception('Method must be overridden')
 
     def section(self, key):
@@ -89,7 +90,26 @@ class ConfigSectionRoot(ConfigProvider):
 
         return value
 
-    def get(self, key):
+    @staticmethod
+    def _extend_value(value, extend):
+        if extend is None or not isinstance(value, str):
+            return value
+
+        assert isinstance(extend, dict)
+
+        tokens = re.findall('{.*?}', value)
+        if len(tokens) > 0:
+            if re.match('^{.*?}$', value) and len(tokens) == 1:
+                key = tokens[0].strip('{}')
+                value = extend[key] if key in extend.keys() else None
+            else:
+                for token in tokens:
+                    key = tokens[0].strip('{}')
+                    value = value.replace(token, extend[key] if key in extend.keys() else None)
+
+        return value
+
+    def get(self, key, extend=None):
         value_taken = False
         value = None
 
@@ -104,15 +124,17 @@ class ConfigSectionRoot(ConfigProvider):
         if not value_taken:
             raise KeyError('No key path [' + key + ']')
 
-        return self._unpack_value(value)
+        return self._extend_value(value=self._unpack_value(value), extend=extend)
 
-    def try_get(self, key, default=None):
+    def try_get(self, key, default=None, extend=None):
         try:
             return self.get(key)
         except KeyError:
             return default
 
-    def strict(self, key, default=None, types=None, values=None, can_call=None, can_iterate=None, non_empty=False):
+    def strict(self, key, default=None, types=None, values=None, can_call=None, can_iterate=None,
+               non_empty=False, extend=None):
+
         value = self.try_get(key=key, default=default)
 
         if non_empty:
@@ -149,6 +171,8 @@ class ConfigSectionRoot(ConfigProvider):
                 assert any(map(lambda t: isinstance(value, t), types_list))
             if values_list:
                 assert value in values_list
+
+        value = self._extend_value(value=value, extend=extend)
 
         return value
 
@@ -209,17 +233,18 @@ class ConfigSection(ConfigProvider):
 
         return '{0}.{1}'.format(self._base, relative_key)
 
-    def get(self, key):
-        return self._provider.get(key=self._get_absolute_key(relative_key=key))
+    def get(self, key, extend=None):
+        return self._provider.get(key=self._get_absolute_key(relative_key=key), extend=extend)
 
-    def try_get(self, key, default=None):
+    def try_get(self, key, default=None, extend=None):
         return self._provider.try_get(key=self._get_absolute_key(relative_key=key),
                                       default=default)
 
-    def strict(self, key, default=None, types=None, values=None, can_call=None, can_iterate=None, non_empty=False):
+    def strict(self, key, default=None, types=None, values=None, can_call=None, can_iterate=None, non_empty=False,
+               extend=None):
         return self._provider.strict(key=self._get_absolute_key(relative_key=key), default=default,
                                      types=types, values=values, can_call=can_call,
-                                     can_iterate=can_iterate, non_empty=non_empty)
+                                     can_iterate=can_iterate, non_empty=non_empty, extend=extend)
 
     def section(self, key):
         return self._provider.section(key=self._get_absolute_key(relative_key=key))

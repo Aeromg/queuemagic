@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-from pipelines.expression_argument import ExpressionArgument
-from pipelines.stage import Stage
 import re
 from bleach import clean
-from services.base.text_factory import TextFactory
+
+from pipelines.expression_argument import ExpressionArgument
+from pipelines.stage import Stage
+
 
 __author__ = 'vdv'
 
@@ -58,7 +59,8 @@ class Beautifulizer(Stage):
 
         raise Exception('Unknown location ' + location)
 
-    def with_html(self, location):
+    @staticmethod
+    def with_html(location):
         return location in ['body']
 
     def remove_html(self):

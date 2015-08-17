@@ -23,7 +23,7 @@ class BusInteract(Stage):
             value = self._vars[key]
             data = value(argument) if callable(value) else value
 
-            self.bus.append_module_data(self, key=key, data=data)
+            self.bus.append_bus_data(key=key, data=data)
 
         return True
 

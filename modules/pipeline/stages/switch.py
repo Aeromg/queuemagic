@@ -28,6 +28,7 @@ class Switch(Stage):
 
     def execute(self):
         stage = self._then_stage if self._condition.get_result() else self._else_stage
+        assert isinstance(stage, Stage)
 
         result = self.bus.append_stage_result(stage, filter_result=True)
         result.run = stage.execute()

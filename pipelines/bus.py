@@ -7,7 +7,7 @@ __author__ = 'vdv'
 
 from messages.mail import EmailFacade
 from messages.snapshot import EmailSnapshotBranch
-from services.base.authority import AuthoritySource
+from services.base.identification import IdentificationSource
 
 
 class Bus(object):
@@ -21,7 +21,7 @@ class Bus(object):
         self._data = data
         self._modules = {}
         self._is_disposing = False
-        self._auth = None
+        self._identity = None
         self._is_authorised = None
 
     @property
@@ -40,18 +40,18 @@ class Bus(object):
             return self._snapshot.email.to_addresses[0].address if len(self._snapshot.email.to_addresses) > 0 else None
 
     @property
-    def auth(self):
+    def identity(self):
         """
-        :rtype : AuthorityInfo
+        :rtype : Identification
         """
         if self._is_authorised is None:
-            auth_source = self._service_resolver.get_service(AuthoritySource)
-            assert isinstance(auth_source, AuthoritySource)
+            auth_source = self._service_resolver.get_service(IdentificationSource)
+            assert isinstance(auth_source, IdentificationSource)
             info = auth_source.try_get_auth(self.sender)
             self._is_authorised = not info is None
-            self._auth = info
+            self._identity = info
 
-        return self._auth
+        return self._identity
 
     @property
     def email(self):
@@ -79,6 +79,9 @@ class Bus(object):
             module_dict[key].update(data)
         else:
             module_dict[key] = data.copy()
+
+    def append_bus_data(self, key, data):
+        self._data[key] = data
 
     def snapshot_push(self):
         log_debug('Snapshot PUSH from version {0}', self._snapshot.version)

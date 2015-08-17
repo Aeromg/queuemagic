@@ -121,9 +121,6 @@ class Pipeline(Stage):
                 if use_snapshots:
                     self.bus.snapshot_pull()
 
-                    #        if use_snapshots:
-                    #            self.bus.snapshot_pull_all()
-
         pipeline_run_result.run = True
         pipeline_run_result.filter = True
 

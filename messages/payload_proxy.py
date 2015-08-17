@@ -2,7 +2,6 @@
 __author__ = 'vdv'
 
 from email.message import Message
-from app.logger import *
 
 
 class EmailPayloadProxy(object):

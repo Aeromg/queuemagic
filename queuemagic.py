@@ -28,8 +28,8 @@ class QueueMagicCliArguments(object):
     @staticmethod
     def _make_parser():
         parser = argparse.ArgumentParser(
-            description='QM',
-            version='VERS',
+            description='QueueMagic the SMTP content filter and processor',
+            version='0.1.0',
         )
         parser.add_argument('-c', '--config', type=str, nargs='+', required=False,
                             help='configuration file')
@@ -193,7 +193,8 @@ class QueueMagicCli(object):
             log_debug('read "{0}" smtp message', self._args.input)
             return EmailFacade(file_path=self._args.input)
 
-    def _print_email(self, email):
+    @staticmethod
+    def _print_email(email):
         log_debug('write output smtp message to stdout')
         email.write_to(sys.stdout)
 
@@ -208,7 +209,7 @@ class QueueMagicCli(object):
         fd = StringIO()
         email.write_to(fd)
         fd.seek(0)
-        p = Popen(args=shlex.split(self._args.output_exec), stdout=PIPE,stdin=PIPE)
+        p = Popen(args=shlex.split(self._args.output_exec), stdout=PIPE, stdin=PIPE)
         p.communicate(input=fd.read())
         p.wait()
 
@@ -315,6 +316,7 @@ class QueueMagicCli(object):
         log_debug('execution completed with {0}', str(pipeline.bus.data))
 
         return return_code
+
 
 cfg = ConfigSectionRoot(dictionary=config)
 args = QueueMagicCliArguments()

@@ -8,6 +8,8 @@ from messages.address import EmailAddress, EmailAddresses
 from messages.header_proxy import EmailMessageHeaderProxy
 
 
+
+# noinspection PyUnusedLocal,PyUnusedLocal,PyUnusedLocal,PyUnusedLocal
 class EmailHeadersAggregator(object):
     ADDRESS_HEADERS = ['From', 'Reply-To', 'Delivered-To', 'Return-Path']
     ADDRESSES_HEADERS = ['To', 'cc', 'bcc']
@@ -79,11 +81,12 @@ class EmailHeadersAggregator(object):
 
         self._header_proxies[header_name] = proxy
 
-        def address_changed(address):
+        # noinspection PyUnusedLocal
+        def address_changed(nobody_cares):
             proxy.on_changed()
 
         def addresses_changed(addresses):
-            value = ', \r\n\t'.join(map(lambda a: a.format(), addresses))
+            value = ', \r\n\t'.join(map(lambda item: item.format(), addresses))
             if header_name in self._message.keys():
                 self._message.replace_header(header_name, value)
             else:

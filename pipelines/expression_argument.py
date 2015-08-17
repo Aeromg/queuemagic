@@ -22,12 +22,12 @@ class ExpressionArgument(object):
         return self._bus.modules
 
     @property
-    def auth(self):
-        return self._bus.auth
+    def identity(self):
+        return self._bus.identity
 
     @property
     def is_alien(self):
-        return self.auth is None
+        return self.identity is None
 
     @property
     def bus(self):

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 __author__ = 'vdv'
 
+'''
+
 import tempfile
 import os
 import string
@@ -120,3 +122,6 @@ class TempFileRepository(object):
 
     def __del__(self):
         self.dispose()
+
+
+'''

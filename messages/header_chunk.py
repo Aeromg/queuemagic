@@ -47,12 +47,14 @@ class EmailHeaderChunk(NotifyChanged):
             return
         except:
             pass
+
         try:
             self._raw = make_header([(self._text, 'utf-8')]).encode()
             self._charset = 'utf-8'
             return
         except:
             pass
+
         try:
             self._raw = make_header([(self._text.encode('utf-8', errors='ignore'), 'utf-8')]).encode()
             self._charset = 'utf-8'

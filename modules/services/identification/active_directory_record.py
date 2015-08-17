@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from services.base.authority import AuthorityInfo
+from services.base.identification import Identification
 
 __author__ = 'vdv'
 
 
-class ActiveDirectoryRecord(AuthorityInfo):
+class ActiveDirectoryRecord(Identification):
     @staticmethod
     def ldap_object_fields_mapping():
         return \
@@ -30,6 +30,8 @@ class ActiveDirectoryRecord(AuthorityInfo):
             }
 
     def __init__(self, info_object):
+        Identification.__init__(self)
+
         self._info_object = info_object
         for key in ActiveDirectoryRecord.ldap_object_fields_mapping().keys():
             if key not in self._info_object.keys():

@@ -7,6 +7,7 @@ except ImportError:
 
 # trying to play cross-version way.
 try:
+    # noinspection PyUnresolvedReferences
     from urllib import request, error
     from urllib.error import HTTPError
     from urllib.parse import quote
@@ -22,7 +23,8 @@ class YandexSpeller(Speller):
 
     def fix(self, text, is_html=False):
         resp = request.urlopen(
-            'http://speller.yandex.net/services/spellservice.json/checkText?ie=%s&text=%s' % ('utf-8', quote(text.encode('utf-8'))))
+            'http://speller.yandex.net/services/spellservice.json/checkText?ie=%s&text=%s'
+            % ('utf-8', quote(text.encode('utf-8'))))
 
         json_data = json.loads(resp.read().decode('utf-8'))
 

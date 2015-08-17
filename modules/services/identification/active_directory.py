@@ -6,13 +6,13 @@ __author__ = 'vdv'
 import re
 import ldap
 
-from services.base.authority import AuthoritySource
-from modules.services.authority.active_directory_record import ActiveDirectoryRecord
+from services.base.identification import IdentificationSource
+from modules.services.identification.active_directory_record import ActiveDirectoryRecord
 
 
-class ActiveDirectory(AuthoritySource):
+class ActiveDirectory(IdentificationSource):
     def __init__(self, config, service_resolver, cache):
-        AuthoritySource.__init__(self, config=config, service_resolver=service_resolver)
+        IdentificationSource.__init__(self, config=config, service_resolver=service_resolver)
 
         assert isinstance(cache, Cache)
 
@@ -32,7 +32,7 @@ class ActiveDirectory(AuthoritySource):
         try:
             self._ldap = ldap.open(self._dc)
             self._ldap.simple_bind(self._user, self._password)
-        except ldap.LDAPError, e:
+        except ldap.LDAPError:
             self._ldap = None
             raise
 
@@ -105,7 +105,7 @@ class ActiveDirectory(AuthoritySource):
     def try_get_auth(self, username):
         """
         :param username: str
-        :rtype : services.authority.AuthorityInfo
+        :rtype : services.identification.AuthorityInfo
         """
         assert isinstance(username, str)
 
@@ -131,7 +131,7 @@ class ActiveDirectory(AuthoritySource):
                 return None
 
             info = ActiveDirectoryRecord(info_object)
-        except ldap.LDAPError, e:
+        except ldap.LDAPError:
             raise
 
         self._cache_set(info, user)

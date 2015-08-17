@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from StringIO import StringIO
+
 from pipelines.stage import Stage
 from services.base.attachments import Attachments
 from services.base.text_factory import TextFactory
+
 
 __author__ = 'vdv'
 
@@ -27,7 +29,7 @@ class VcardInject(Stage):
     def execute(self):
         view_bag = self.config.strict('view_bag', types=[dict], default={}).copy()
         view_bag.update({
-            'auth': self.bus.auth,
+            'auth': self.bus.identity,
             'sender': self.bus.sender,
             'recipient': self.bus.recipient,
             'modules': self.bus.modules

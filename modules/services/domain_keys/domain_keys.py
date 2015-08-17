@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-from messages.mail import EmailFacade
-from services.base.domain_keys import DomainKeysSigner as DomainKeysSignerBase
 import os
 import dkim
 from StringIO import StringIO
+
+from messages.mail import EmailFacade
+from services.base.domain_keys import DomainKeysSigner as DomainKeysSignerBase
+
 
 __author__ = 'vdv'
 
@@ -54,8 +56,10 @@ class DomainKeysSigner(DomainKeysSignerBase):
             conf = self._domains[domain]
             return DomainKeysSignerDomainConfig(domain=domain,
                                                 private_key=conf['private_key'],
-                                                headers=conf['headers'] if 'headers' in conf.keys() else self._headers,
-                                                selector=conf['selector'] if 'selector' in conf.keys() else self._selector)
+                                                headers=conf['headers'] if 'headers' in conf.keys()
+                                                else self._headers,
+                                                selector=conf['selector'] if 'selector' in conf.keys()
+                                                else self._selector)
 
         domain_parts = domain.split('.')
         for i in xrange(0, len(domain_parts)):
@@ -65,8 +69,10 @@ class DomainKeysSigner(DomainKeysSignerBase):
                 if 'with_subdomains' in conf.keys() and conf['with_subdomains']:
                     return DomainKeysSignerDomainConfig(domain=domain,
                                                         private_key=conf['private_key'],
-                                                        headers=conf['headers'] if 'headers' in conf.keys() else self._headers,
-                                                        selector=conf['selector'] if 'selector' in conf.keys() else self._selector)
+                                                        headers=conf['headers'] if 'headers' in conf.keys()
+                                                        else self._headers,
+                                                        selector=conf['selector'] if 'selector' in conf.keys()
+                                                        else self._selector)
 
         if not self._default_domain_enabled:
             return None

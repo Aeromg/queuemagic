@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from UserDict import UserDict
 import shelve
 import os
 
@@ -50,6 +49,7 @@ class ShelveDict(PersistentDictionary):
     def __enter__(self):
         return self
 
+    # noinspection PyUnusedLocal
     def __exit__(self, type, value, traceback):
         self.dispose()
 

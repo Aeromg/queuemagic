@@ -4,7 +4,7 @@ from pipelines.filter import Filter
 __author__ = 'vdv'
 
 
-class Auth(Filter):
+class Identification(Filter):
     def __init__(self, name, bus, config, service_resolver):
         Filter.__init__(self, name=name, config=config, bus=bus, service_resolver=service_resolver)
 
@@ -16,7 +16,7 @@ class Auth(Filter):
                                                    values=['any', 'internal', 'external'])
 
     def test(self):
-        auth = self.bus.auth
+        auth = self.bus.identity
 
         if auth is None:
             return self._sender_location in ['any', 'external']

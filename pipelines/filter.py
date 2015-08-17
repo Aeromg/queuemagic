@@ -22,6 +22,7 @@ class Filter(Module):
         return self.test() != self.is_negation
 
 
+# noinspection PyMissingConstructor
 class BypassFilter(Filter):
     def __init__(self):
         pass
@@ -34,5 +35,6 @@ class BypassFilter(Filter):
         # base filter isn't test anything
         return True
 
+    @property
     def name(self):
         return 'bypass'

@@ -3,13 +3,14 @@ __author__ = 'vdv'
 
 from utils.notify_changed import NotifyChanged
 
-
+# noinspection PyUnusedLocal
 class ObservableList(list, NotifyChanged):
     class NullObserver(object):
         """
         If a call to a method is made, this class prints the name of the method
         and all arguments.
         """
+
         def __init__(self, observable):
             self._observable = observable
 

@@ -4,8 +4,6 @@ from services.base.attachments import Attachments
 
 __author__ = 'vdv'
 
-import os
-
 
 class LogoInject(Stage):
     def __init__(self, name, config, bus, filter, service_resolver):
@@ -27,7 +25,7 @@ class LogoInject(Stage):
 
         optional = self._is_optional
 
-        auth = self.bus.auth
+        auth = self.bus.identity
         if not auth is None and self._user_def in auth.extra.keys():
             image = auth.extra[self._user_def]
         else:

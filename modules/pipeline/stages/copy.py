@@ -14,7 +14,7 @@ class Copy(Stage):
         Stage.__init__(self, name=name, config=config, bus=bus, filter=filter, service_resolver=service_resolver)
 
         self._destination = self.config.strict(key='destination', types=[str], default=None)
-        self._lambda = self.config.strict(key='lambda', can_call=True, non_empty=False)
+        self._lambda = self.config.strict(key='lambda', can_call=True, non_empty=False, default=None)
 
         assert bool(self._destination) != bool(self._lambda)
         assert not self._destination is None or not self._lambda is None

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from services.base.cache import Cache
 from services.service_fabric import ServiceFabric
-from modules.services.authority.active_directory import ActiveDirectory
+from modules.services.identification.active_directory import ActiveDirectory
 from app.config_provider import ConfigProvider
 
 __author__ = 'vdv'

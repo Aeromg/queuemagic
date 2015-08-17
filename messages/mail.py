@@ -95,11 +95,11 @@ class EmailFacade(object):
 
     @property
     def is_forward(self):
-        return self.is_reply and self.header['Subject'].lower().startswith('Fwd:')
+        return self.is_reply and self.header['Subject'].lower().startswith('fwd:')
 
     @property
     def is_referenced(self):
-        return self.header.contains('References')
+        return self.header.contains('References') or self.is_reply
 
     @property
     def html(self):

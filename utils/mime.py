@@ -15,7 +15,7 @@ class Mime(object):
     @staticmethod
     def get_mime(file_name):
         if '/' in file_name:
-            file_path = os.path.basename(file_name)
+            file_name = os.path.basename(file_name)
 
         t, v = Mime._mime.guess_type(pathname2url(file_name))
         return t

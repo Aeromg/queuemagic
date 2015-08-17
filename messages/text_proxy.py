@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 __author__ = 'vdv'
 
-from messages.payload_proxy import EmailPayloadProxy
 import base64
 import quopri
+
+from messages.payload_proxy import EmailPayloadProxy
 
 
 def _get_encoder_by_selector(selector):
@@ -45,14 +46,17 @@ class EmailTextContentProxy(EmailPayloadProxy):
 
     def get_text(self):
         charset = self.charset
-        if not charset:
+        if charset is None:
             return self.get_content(decode=True)
 
         decoded = self.get_content(decode=True)
         try:
             return unicode(decoded.decode(charset))
         except:
-            return unicode(decoded.decode(charset, errors='ignore'))
+            try:
+                return unicode(decoded.decode(charset, errors='ignore'))
+            except:
+                return unicode(decoded)
 
     def set_text(self, text):
         charset = self.charset

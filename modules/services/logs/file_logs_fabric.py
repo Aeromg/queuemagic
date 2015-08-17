@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-from modules.services.db.shelve_dict import ShelveDict
 from modules.services.logs.file_logs import FileLogs
 from services.service_fabric import ServiceFabric
-from app.config_provider import ConfigProvider
 
 __author__ = 'vdv'
 
